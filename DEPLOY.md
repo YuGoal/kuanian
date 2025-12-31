@@ -17,12 +17,12 @@
 
 2. **在 GitHub 上创建新仓库**
    - 访问 https://github.com/new
-   - 创建新仓库（例如：`paipaiio-2026`）
+   - 创建新仓库（例如：`2026-countdown`）
    - **不要**初始化 README、.gitignore 或 license
 
 3. **将代码推送到 GitHub**
    ```bash
-   git remote add origin https://github.com/你的用户名/paipaiio-2026.git
+   git remote add origin https://github.com/你的用户名/2026-countdown.git
    git branch -M main
    git push -u origin main
    ```
@@ -54,7 +54,7 @@
    - 等待构建完成（通常 1-3 分钟）
 
 6. **完成**
-   - 部署成功后，你会获得一个 URL（例如：`https://paipaiio-2026.vercel.app`）
+   - 部署成功后，你会获得一个 URL（例如：`https://2026-countdown.vercel.app`）
    - 每次推送到 GitHub，Vercel 会自动重新部署
 
 ## 方法 2: 通过 Vercel CLI 部署
@@ -85,7 +85,7 @@ vercel
 - **Set up and deploy?** → 输入 `Y`
 - **Which scope?** → 选择你的账号
 - **Link to existing project?** → 输入 `N`（首次部署）
-- **What's your project's name?** → 输入项目名称（例如：`paipaiio-2026`）
+- **What's your project's name?** → 输入项目名称（例如：`2026-countdown`）
 - **In which directory is your code located?** → 输入 `./`（当前目录）
 
 ### 步骤 4: 生产环境部署

@@ -17,6 +17,9 @@ export default function Fireworks() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const particlesRef = useRef<Particle[]>([])
   const animationFrameRef = useRef<number>()
+  const fireworkIntervalRef = useRef<NodeJS.Timeout>()
+  const lastTimeRef = useRef<number>(performance.now())
+  const isVisibleRef = useRef<boolean>(true)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -32,6 +35,37 @@ export default function Fireworks() {
 
     resizeCanvas()
     window.addEventListener('resize', resizeCanvas)
+    
+    // 页面可见性变化处理
+    const handleVisibilityChange = () => {
+      const isVisible = !document.hidden
+      isVisibleRef.current = isVisible
+      
+      if (isVisible) {
+        // 页面恢复时，清理旧粒子并重新开始
+        particlesRef.current = []
+        lastTimeRef.current = performance.now()
+        
+        // 重新启动动画
+        if (!animationFrameRef.current) {
+          animate()
+        }
+        
+        // 重新启动烟花发射
+        if (fireworkIntervalRef.current) {
+          clearInterval(fireworkIntervalRef.current)
+        }
+        startFireworkInterval()
+      } else {
+        // 页面隐藏时，清理动画帧
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current)
+          animationFrameRef.current = undefined
+        }
+      }
+    }
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     const colors = [
       '#ff6b6b', '#ff4757', '#ff3838', // 红色系
@@ -78,6 +112,14 @@ export default function Fireworks() {
     }
 
     const animate = () => {
+      if (!isVisibleRef.current) {
+        return
+      }
+      
+      const currentTime = performance.now()
+      const deltaTime = Math.min((currentTime - lastTimeRef.current) / 16.67, 2) // 限制最大 deltaTime，避免卡顿
+      lastTimeRef.current = currentTime
+      
       // 使用更透明的清除，让烟花轨迹更明显
       ctx.fillStyle = 'rgba(0, 0, 0, 0.15)'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
@@ -85,12 +127,14 @@ export default function Fireworks() {
       for (let i = particlesRef.current.length - 1; i >= 0; i--) {
         const particle = particlesRef.current[i]
 
-        particle.x += particle.vx
-        particle.y += particle.vy
-        particle.vy += 0.1 // gravity
-        particle.life -= particle.decay
+        // 使用 deltaTime 来平滑动画，避免时间跳跃
+        particle.x += particle.vx * deltaTime
+        particle.y += particle.vy * deltaTime
+        particle.vy += 0.1 * deltaTime // gravity
+        particle.life -= particle.decay * deltaTime
 
-        if (particle.life > 0) {
+        if (particle.life > 0 && particle.x >= 0 && particle.x <= canvas.width && 
+            particle.y >= 0 && particle.y <= canvas.height) {
           ctx.globalAlpha = particle.life
           ctx.fillStyle = particle.color
           ctx.shadowBlur = 10
@@ -109,23 +153,30 @@ export default function Fireworks() {
       animationFrameRef.current = requestAnimationFrame(animate)
     }
 
+    const startFireworkInterval = () => {
+      fireworkIntervalRef.current = setInterval(() => {
+        if (!isVisibleRef.current) return
+        
+        const x = Math.random() * canvas.width
+        const y = Math.random() * canvas.height * 0.6
+        createFirework(x, y)
+        
+        // 有时同时发射多个烟花
+        if (Math.random() > 0.7) {
+          setTimeout(() => {
+            if (!isVisibleRef.current) return
+            const x2 = Math.random() * canvas.width
+            const y2 = Math.random() * canvas.height * 0.6
+            createFirework(x2, y2)
+          }, 300)
+        }
+      }, 1500) // 更频繁，每1.5秒一次
+    }
+
     animate()
 
-    // 定期发射烟花 - 更频繁
-    const fireworkInterval = setInterval(() => {
-      const x = Math.random() * canvas.width
-      const y = Math.random() * canvas.height * 0.6
-      createFirework(x, y)
-      
-      // 有时同时发射多个烟花
-      if (Math.random() > 0.7) {
-        setTimeout(() => {
-          const x2 = Math.random() * canvas.width
-          const y2 = Math.random() * canvas.height * 0.6
-          createFirework(x2, y2)
-        }, 300)
-      }
-    }, 1500) // 更频繁，每1.5秒一次
+    // 启动烟花发射
+    startFireworkInterval()
 
     // 初始烟花
     setTimeout(() => {
@@ -140,7 +191,10 @@ export default function Fireworks() {
 
     return () => {
       window.removeEventListener('resize', resizeCanvas)
-      clearInterval(fireworkInterval)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      if (fireworkIntervalRef.current) {
+        clearInterval(fireworkIntervalRef.current)
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
       }
