@@ -1,7 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: 'standalone',
+  // 移除 standalone，Cloudflare Pages 不支持
+  // output: 'standalone',
 }
 
 module.exports = nextConfig

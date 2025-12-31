@@ -53,6 +53,10 @@ npm run dev
 
 详细的部署指南请查看 [DEPLOY.md](./DEPLOY.md)
 
+**⚠️ 中国大陆访问问题**：
+- 如果 Vercel 在中国大陆无法访问，请查看 [CHINA_DEPLOY.md](./CHINA_DEPLOY.md) 了解替代方案
+- 关于域名映射的详细说明，请查看 [DOMAIN_MAPPING.md](./DOMAIN_MAPPING.md)
+
 ### 快速部署
 
 **方法 1: 通过 GitHub（推荐）**
